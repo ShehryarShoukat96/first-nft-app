@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
+import "./SafeMath.sol";
+
 // Inspired by https://www.myhsts.org/blog/ethereum-dapp-with-evm-remix-golang-truffle-and-solidity-part1.html
 contract Auction {
+    using SafeMath for uint256;
+
     event BidEvent(address indexed highestBidder, uint256 highestBid);
     event WithdrawalEvent(address withdrawer, uint256 amount);
     event CanceledEvent(string message, uint256 time);
@@ -29,7 +33,7 @@ contract Auction {
     constructor (uint _biddingTime, address  _owner,string memory _brand, string memory _Rnumber) {
         auctionOwner = _owner;
         auctionStart = block.timestamp;
-        auctionEnd = auctionStart +  (_biddingTime * auctionTime);
+        auctionEnd = auctionStart.add(_biddingTime.mul(auctionTime));
         STATE = AuctionState.STARTED;
 
         Mycar = Car({
@@ -48,18 +52,19 @@ contract Auction {
         _;
     }
 
-    function _auctionEnded () private pure returns (bool) {
-        return (STATE == AuctionState.CANCELLED) || (block.timestamp <= auctionEnd);
+    function _auctionEnded () private returns (bool) {
+        return (STATE == AuctionState.CANCELLED) || (block.timestamp > auctionEnd);
     }
 
     function bid() public payable anOngoingAuction returns (bool) {
-        require(bids[msg.sender] + msg.value >  highestBid, "can/'t bid, Make a higher Bid");
+        uint newBid = bids[msg.sender].add(msg.value);
+        require(newBid >  highestBid, "can/'t bid, Make a higher Bid");
 
         highestBidder = msg.sender;
-        highestBid =  (bids[msg.sender] + msg.value);
+        highestBid =  newBid;
         bidders.push(msg.sender);
 
-        bids[msg.sender] = bids[msg.sender] + msg.value;
+        bids[msg.sender] = newBid;
         emit  BidEvent(highestBidder, highestBid);
 
         return true;
