@@ -65,6 +65,26 @@ contract Auction is ERC721 {
         return (STATE == AuctionState.CANCELLED) || (block.timestamp > auctionEnd);
     }
 
+    function getBid(address _address) public view returns (uint) {
+        return bids[_address];
+    }
+
+    function transferNft() public onlyOwner returns (bool) {
+        require(_auctionEnded(), "can't transfer, Auction is still  open");
+
+        uint amount = bids[highestBidder];
+        bids[highestBidder] = 0;
+
+        (bool sent, ) = msg.sender.call{value: amount}("");
+
+        require(sent, "Transfer failed");
+
+        safeTransferFrom(msg.sender, highestBidder, tokenId);
+        auctionOwner = highestBidder;
+
+        return true;
+    }
+
     function bid() public payable anOngoingAuction returns (bool) {
         uint newBid = bids[msg.sender].add(msg.value);
         require(newBid >= 10000, "bid should be at least 10000 Wei");
@@ -80,7 +100,7 @@ contract Auction is ERC721 {
         return true;
     }
 
-    function  withdraw() public returns (bool) {
+    function withdraw() public returns (bool) {
         require(_auctionEnded(), "can't withdraw, Auction is still  open");
         require(highestBidder != msg.sender, "Highest Bidder is not allowed withdraw");
 
