@@ -69,6 +69,10 @@ contract Auction is ERC721 {
         return bids[_address];
     }
 
+    function getBalance(address _address) public view returns (uint) {
+        return balanceOf(_address);
+    }
+
     function transferNft() public onlyOwner returns (bool) {
         require(_auctionEnded(), "can't transfer, Auction is still  open");
 
