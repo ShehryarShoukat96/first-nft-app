@@ -18,6 +18,13 @@ contract("Auction", accounts => {
     assert.equal(auctionTime.toString(), "600");
   });
 
+  it("owner nft balance should be one.", async () => {
+    // Get stored value
+    const balance = await auctionInstance.getBalance(OWNER);
+
+    assert.equal(balance.toString(), "1");
+  });
+
   it("FIRST_BIDDER should be able to bid.", async () => {
     const bid = "1000000";
     await auctionInstance.bid({ from: FIRST_BIDDER, value: bid });
