@@ -1,2 +1,3 @@
 # first-nft-app
-A simple NFT implemented app in Solidity
+A simple NFT implemented app in Solidity and Truffle 
+
