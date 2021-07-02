@@ -125,4 +125,8 @@ contract Auction is ERC721 {
 
         return true;
     }
+
+    function getTime() public view returns (uint) {
+        return block.timestamp;
+    }
 }
